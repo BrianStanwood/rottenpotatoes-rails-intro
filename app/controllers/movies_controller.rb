@@ -11,7 +11,23 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    #@movies = Movie.all
+    mSorted = params[:mSorted]
+    rSorted = params[:rSorted]
+      if mSorted
+        flash[:rSorted] = false
+        flash[:mSorted] = true
+        @movies = Movie.all.order(:title)
+      elsif rSorted
+        flash[:mSorted] = false
+        flash[:rSorted] = true
+        @movies = Movie.all.order(:release_date)
+      else
+        flash[:mSorted] = false
+        flash[:rSorted] = false
+        @movies = Movie.all
+        
+      end
   end
 
   def new

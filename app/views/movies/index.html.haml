@@ -3,18 +3,46 @@
 
 %table#movies
   %thead
+    
     %tr
-      %th= link_to "Movie Title"
+      -if flash[:mSorted]
+        %th.hilite= link_to "Movie Title", movies_path( mSorted: true)
+      -else 
+        %th= link_to "Movie Title", movies_path( mSorted: true)
+        
       %th Rating
-      %th= link_to "Release Date"
+
+      -if flash[:rSorted] 
+        %th.hilite= link_to "Release Date", movies_path( rSorted: true)
+      -else
+        %th= link_to "Release Date", movies_path( rSorted: true)
+        
       %th More Info
   %tbody
-    - @movies.each do |movie|
-      %tr
-        %td= movie.title 
-        %td= movie.rating
-        %td= movie.release_date
-        %td= link_to "More about #{movie.title}", movie_path(movie)
+    - if flash[:mSorted] == true
+      -sorted = @movies.order(:title)
+      -sorted.each do |movie|
+        %tr
+          %td= movie.title
+          %td= movie.rating
+          %td= movie.release_date
+          %td= link_to "More about #{movie.title}", movie_path(movie)
+    - elsif flash[:rSorted] == true
+      -sorted = @movies.order(:release_date)
+      -sorted.each do |movie|
+        %tr
+          %td= movie.title 
+          %td= movie.rating
+          %td= movie.release_date
+          %td= link_to "More about #{movie.title}", movie_path(movie)
+    - else
+      - @movies.each do |movie|
+        %tr
+          %td= movie.title 
+          %td= movie.rating
+          %td= movie.release_date
+          %td= link_to "More about #{movie.title}", movie_path(movie)
+
 
 = link_to 'Add new movie', new_movie_path
 
