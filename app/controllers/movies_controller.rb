@@ -3,31 +3,33 @@ class MoviesController < ApplicationController
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
-
+   
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
     # will render app/views/movies/show.<extension> by default
   end
+  
+  
 
   def index
-    #@movies = Movie.all
-    mSorted = params[:mSorted]
-    rSorted = params[:rSorted]
-      if mSorted
-        flash[:rSorted] = false
-        flash[:mSorted] = true
-        @movies = Movie.all.order(:title)
-      elsif rSorted
-        flash[:mSorted] = false
-        flash[:rSorted] = true
-        @movies = Movie.all.order(:release_date)
-      else
-        flash[:mSorted] = false
-        flash[:rSorted] = false
-        @movies = Movie.all
-        
-      end
+    @movies = Movie.all
+  end
+  
+  def title_header
+    #code to control the highlight in the view
+    @movies = Movie.all.order(:title)
+    @highlightTitle = "hilite"
+    #sort code, send to title_header.haml
+    render :index # title_header.haml
+  end
+  
+  def release_date_header
+    @highlightReleaseDate = "hilite"
+    @movies = Movie.all.order(:release_date)
+    #sort code, send to release_date_header.haml
+    render :index
+    
   end
 
   def new
