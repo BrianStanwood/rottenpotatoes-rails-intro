@@ -1,9 +1,10 @@
 class MoviesController < ApplicationController
 
+  
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
-   
+
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
@@ -11,44 +12,45 @@ class MoviesController < ApplicationController
   end
 
   def index
-    #@movies = Movie.all
+    
+      need_redirect = false
     @all_ratings = Movie.distinct.pluck(:rating)
-    ratings = params[:ratings]
-    if ratings == nil
-      @movies = Movie.all
+    ratings = params[:ratings] || session[:ratings] || {}
+    if ratings != {}
+      @ratings = ratings
     else
-      @movies = Movie.where(rating: ratings.keys)
+      @ratings = Hash.new
+      @all_ratings.each {|r| @ratings[r] = 1}
+    end
+    if params[:ratings]
+      session[:ratings] = @ratings
+    elsif session[:ratings]
+      need_redirect = true
     end
     
-    
-  end
-  
-  def title_header
-    @all_ratings = Movie.distinct.pluck(:rating)
-    #code to control the highlight in the view
-    ratings = params[:ratings]
-    if ratings == nil
-      @movies = Movie.all.order(:title)
-    else
-      @movies = Movie.where(rating: ratings.keys).order(:title)
+    sort_by = params[:sort_by] || session[:sort_by]
+    if params[:sort_by]
+      session[:sort_by] = sort_by
+    elsif session[:sort_by]
+      need_redirect = true
     end
-    @highlightTitle = "hilite"
-    #sort code, send to title_header.haml
-    render :index # title_header.haml
-  end
-  
-  def release_date_header
-    @all_ratings = Movie.distinct.pluck(:rating)
-    @highlightReleaseDate = "hilite"
-    ratings = params[:ratings]
-    if ratings == nil
-      @movies = Movie.all.order(:title)
-    else
-      @movies = Movie.where(rating: ratings.keys).order(:release_date)
+
+    if need_redirect
+      redirect_to :sort_by => sort_by, :ratings => @ratings
     end
-    #sort code, send to release_date_header.haml
-    render :index
-    
+
+    if sort_by == "title" 
+      @movies = Movie.where(rating: @ratings.keys).order("title ASC")
+      @title_class = "hilite"
+    elsif sort_by == "release_date"
+      @movies = Movie.where(rating: @ratings.keys).order("release_date ASC")
+      @release_date_class = "hilite"
+    else
+      @movies = Movie.where(rating: @ratings.keys)
+    end
+     
+     
+
   end
 
   def new
